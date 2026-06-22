@@ -108,26 +108,54 @@ this is done with a bitwise OR operation.
 
 After all the above is done, the green user LED must be turn ON. 
 
-## Developed Bare-Metal C program for manipulating bits inside peripheral registers and turning LD2 green user LED ON
+## 4. Developed Bare-Metal C program for manipulating bits inside peripheral registers and turning LD2 green user LED ON
 
-The following images contain the source code i wrote in C programming language for embedded systems, using deterministic sized types from stdint.h, let's take a look:
+The following images contain the source code i wrote using the C programming language for embedded systems, using deterministic sized types from stdint.h, let's take a look:
 
 ![verification](./images/program_description.png) ![verification](./images/blinky_src.png)
 
 i included **stdint.h** in order to gain access to deterministic sized types. After that i created a symbolic constant named 'TRUE', the replacement text is 1. 
-Then i created three pointer variables in order to hold the memory addresses of the peripheral registers that i need to manipulate:
+Then i created three pointer variables in order to hold the memory addresses of the peripheral registers that i needed to manipulate:
 
-***ptr_ClkCtrlReg**: holds the memory address of the RCC_AHB1ENR.
+***ptr_ClkCtrlReg**: holds the memory address of the RCC_AHB1ENR, i manipulate this register in order to enable the clock for the peripherals connected to the AHB1 bus (including the GPIOA peripheral as mentioned before).
 
-***ptr_PortAModeReg**: stores the address of the GPIOA port mode register (GPIOA_MODER).
+***ptr_PortAModeReg**: stores the address of the GPIOA port mode register (GPIOA_MODER). This register is used in order to set the PA5 pin to output mode, which is needed in order to turn the LD2 ON.
 
-***ptr_PortAOutReg**: holds the memory address of the GPIOA port output data register (GPIOA_ODR).
+***ptr_PortAOutReg**: holds the memory address of the GPIOA port output data register (GPIOA_ODR). i manipulate the bit position 5 of this register in order to ON, so that it turns ON the LD2.
 
 the first thing i did was to enable the clock for the GPIO port A peripheral, for that purpose i used a bitwise OR operation using the bit mask 0x01 to set the bit position 0 ON (As shown on line 35).
 
-After that, i cleared the bit positions 10 and 11 of GPIOA_MODER using bitwise AND operation with the 0xFFFFF3FF mask. Then i used bitwise OR operation to set bit position 10, using the bit mask 0x00000400 in order to make the pattern of bit positions 10 and 11 as 01 (as shown in lines 38 and 41), which means general purpose output mode.
+After that, i cleared the bit positions 10 and 11 of GPIOA_MODER using bitwise AND operation with the 0xFFFFF3FF mask. Then i used bitwise OR operation to set bit position 10, using the bit mask 0x00000400 in order to make the pattern of bit positions 10 and 11 as binary 01 (as shown in lines 38 and 41), which means general purpose output mode.
 
-Finally, i set the bit position 5 of GPIOA_ODR by using bitwise OR operation. After this is done the LD2 green user LED actually turns ON. 
+Finally, i set the bit position 5 of GPIOA_ODR by using bitwise OR operation with the bit mask 0x0020. After this is done the LD2 green user LED actually turns ON. 
 
 In the final step, control goes to an infinite while loop in order to keep the LED ON). 
+
+## Showing the execution of the program step by step while keeping track of the peripheral registers stored values
+
+In this section, using the debug mode of STM32CubeIDE i'm going to show the step by step execution of the code while gazing at each bit position of the peripheral registers
+
+![verification](./images/debug_mode_1.png)
+
+The image above reveals the initial state or reset value of AHB1ENBR which is zero.
+
+![verification](./images/debug_mode_2.png)
+
+after line 35 is executed, the bit position 0 of the AHB1ENBR is set, which means that the clock is enabled to all peripherals connected to AHB1 bus.
+
+![verification](./images/debug_mode_3.png)
+
+Once line 38 gets executed, the bit positions 10 and 11 of GPIOA_MODER are cleared, which means, they become zero, even though those where the reset value of those bits, it's important to clear these positions, making sure they hold zero value before stting bit position 10 and configure the mode of PA5 pin to output mode.
+
+![verification](./images/debug_mode_4.png)
+
+After line 41 is executed bit position 10 gets SET, and the bit pattern of MODER 5 get's configured to output mode.
+
+![verification](./images/debug_mode_5.png)
+
+Once line 46 is executed, the bit position 5 of GPIOA_ODR gets SET and starts outputing a HIGH voltage, and turning the LD2 ON, as show in the image below:
+
+![verification](./images/LD2_encendido.jpg)
+
+
 
