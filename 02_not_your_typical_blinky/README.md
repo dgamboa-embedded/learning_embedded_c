@@ -12,10 +12,14 @@ The last reason is that i didn't use any Hardware Abstraction Layers from any ex
 So, this is not your typical blinky.   
 
 ## Objectives:
-* Turn on the green led (LD2) on ARM Cortex-M4 STM32 F446RE-NUCLEO microcontroller without relying on HAL (Hardware Abstraction Layers) or any operating system (Bare-Metal).
-* Read ARM Cortex-M4 STM32 F446RE-NUCLEO microcontroller's schematic (MB1136-C-03) to find the LD2 and the SB's (solder bridges) involved on it's path to a certain pin on the board (PA5). 
+* To turn on the green led (LD2) on ARM Cortex-M4 STM32 F446RE-NUCLEO microcontroller without relying on HAL (Hardware Abstraction Layers) or any operating system (Bare-Metal).
+* To read ARM Cortex-M4 STM32 F446RE-NUCLEO microcontroller's schematic (MB1136-C-03) to find the LD2 and the SB's (solder bridges) involved on it's path to a certain pin on the board (PA5). 
 * Read the user manual (UM1724), section 7.11 in order to check the solder bridges interacting with LD2 on its way to the PA5 pin on the board.
-* Use the multimeter to find out if there is a closed circuit between the LD2 and the PA5 pin. 
+* to use the AstroAI DM6000AR multimeter in order to find out if there is a closed circuit between the LD2 and the PA5 pin. 
+* to consult the STM32 F446RE-NUCLEO microcontroller's datasheet in order to find the board's block diagram to figure out what bus connects the GPIO port A peripheral to the processor.
+* To consult the STM32 F446RE-NUCLEO microcontroller's reference manual in order toTo consult the STM32 F446RE-NUCLEO microcontroller's reference manual in order to find find the memory map of the board, and there, to obtain the base memory addresses of GPIOA and RCC peripherals.
+* To consult the STM32 F446RE-NUCLEO microcontroller's reference manual in order to find the offset and the reset values of RCC AHB1 Enabler Register (RCCAHB1ENR), GPIO port A Mode Register (GPIOA_MODER) and GPIO port A Output Data Register (GPIOA_ODR).
+* To develop a program in Bare-Metal, using the C programming language to manipulate the appropriate peripheral registers using pointers, bitmasks and bitwise operations to turn ON the LD2 green user LED.
 
 ## Technical Insights:
 
@@ -60,7 +64,7 @@ The conclusion is: **there's a closed circuit between LD2 and PA5.**
 
 ## 3. Using the STM32 F446RE-NUCLEO board's reference manual to find the appropriate peripheral registers, and manipulating them with pointers and bitwise operations:
 
-Before manipulating the GPIO registers to work withe PA5 pin, i actually searched in the STM32 F446RE-NUCLEO board's datasheet to find the boards block diagram:
+Before manipulating the GPIO registers to work with PA5 pin, i look into the STM32 F446RE-NUCLEO board's datasheet for the board's block diagram:
 
 ![connection_1](./images/F446RE-NUCLEO_block_diagram.png)
 
@@ -119,7 +123,28 @@ this is done with a bitwise OR operation.
 
 After all the above is done, the green user LED must be turn ON. 
 
-## 4. Developed Bare-Metal C program for manipulating bits inside peripheral registers and turning LD2 green user LED ON
+## 4. Hardware Mapping & Register Reference
+
+To implement this bare-metal driver, the following hardware resources, memory-mapped registers, and physical pins were analyzed and manipulated:
+
+| Category | Parameter / Resource | Value / Address | Description / Hexadecimal Mask |
+| :--- | :--- | :--- | :--- |
+| **MCU Core** | Architecture | ARM Cortex-M4 | 32-bit NUCLEO-STM32F446RE |
+| **Peripheral** | RCC Base Address | `0x40023800` | Reset and Clock Control peripheral boundary |
+| **Peripheral** | GPIOA Base Address | `0x40020000` | General Purpose I/O Port A boundary |
+| **Register** | `RCC_AHB1ENR` | `0x40023830` | Clock enable register (Offset: `0x30`) |
+| **Register** | `GPIOA_MODER` | `0x40020000` | GPIO Port A mode register (Offset: `0x00`) |
+| **Register** | `GPIOA_ODR` | `0x40020014` | GPIO Port A output data register (Offset: `0x14`) |
+| **Bitmask** | Clock Enable Mask | `0x00000001` | SET Bit 0 to `1` to enable the clock for GPIOA peripheral |
+| **Bitmask** | MODER Clear Mask | `0xFFFFF3FF` | Clears Bit positions 10 & 11 via bitwise AND to safely reset the field |
+| **Bitmask** | MODER Set Mask | `0x00000400` | Turns Bit positions 10 and 11 to `01` via bitwise OR for General Purpose Output mode |
+| **Bitmask** | ODR Set Mask | `0x00000020` | Force Bit 5 to `1` via bitwise OR to drive PA5 HIGH |
+| **Hardware** | User LED | `LD2` (Green) | On-board LED connected to `PA5` |
+| **Solder Bridge**| Factory Routing | `SB42` (ON) / `SB29` (OFF) | Routes `PA5` to LED; isolates `PB13` |
+| **Physical Pin** | Arduino Connector | `D13` (CN5 - Pin 6) | Shared routing with User LED for Shield compatibility |
+| **Physical Pin** | Morpho Connector | `CN10 - Pin 11` | Physical GPIO port A pin number 5 (PA5)|
+
+## 5. Developed Bare-Metal C program for manipulating bits inside peripheral registers and turning LD2 green user LED ON
 
 The following images contain the source code i wrote using the C programming language for embedded systems, using deterministic sized types from stdint.h, let's take a look:
 

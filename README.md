@@ -6,6 +6,7 @@
 
 1. ARM CORTEX-M4 STM32 F446RE-NUCLEO board.
 2. STLINK/V3-SET programmer/debugger.
+3. ASTROAI DM6000AR Digital Multimeter
 
 The course expects the STM32F407 DISCOVERY board for the code examples implementation. That means: I have to checkout the documentation of my board to find the equivalent pin or memory location, which derives in a deeper understanding of the hardware's architecture.
 
@@ -15,3 +16,4 @@ STM32CubeIDE 1.19.0 version.
 
 ### Table of contents:
 * [01 - Embedded Hello World](./01_embedded_hello_world): redirect the output of printf to the ITM (Instrumentation Trace Macrocell Unit)  inside the processor and read the output via SWD debugging protocol and the SWV console in the IDE.
+* [02_not_your_typical_blinky](./02_not_your_typical_blinky): manipulate the RCC and GPIOA peripherals at the bit level by accessing their respective registers (RCC_AHB1ENR, GPIOA_MODER, and GPIOA_ODR), in order to turn ON the onboard green user LED (LD2) connected to pin PA5 (GPIO por A pin number 5) without using HAL libraries.
