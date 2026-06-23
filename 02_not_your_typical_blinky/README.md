@@ -1,5 +1,16 @@
 # Project 02: Not your typical blinky
 
+### Quick note for the reader:
+First of all, i wanted to highlight the fact that the title of this project might made you guessing: why is this blinky not a typical blinky?
+
+The answer to that question comes from the effort i made while doing some research on the STM32 Nucleo-F446RE board's datasheet, user manual, schematic, and reference manual in order to find the hardware connections needed to turn ON the green user LED LD2, including finding the right system bus, the right GPIO peripheral, the appropriate RCC peripheral registers, furthermore, the required GPIO registers, such as GPIOx_MODER and GPIOx_ODR which are explain in the next sections. 
+
+It's also worth mentioning that i used the multimeter in order to check the resistance found in the closed circuit between LD2 and PA5 (GPIO port A pin number 5), besides that i added 2 volts from the multimeter in order to check if there was a closed circuit there.
+
+The last reason is that i didn't use any Hardware Abstraction Layers from any external library, this Blinky is 100% Bare-Metal programmed using the C programming language. 
+
+So, this is not your typical blinky.   
+
 ## Objectives:
 * Turn on the green led (LD2) on ARM Cortex-M4 STM32 F446RE-NUCLEO microcontroller without relying on HAL (Hardware Abstraction Layers) or any operating system (Bare-Metal).
 * Read ARM Cortex-M4 STM32 F446RE-NUCLEO microcontroller's schematic (MB1136-C-03) to find the LD2 and the SB's (solder bridges) involved on it's path to a certain pin on the board (PA5). 
