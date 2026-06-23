@@ -84,7 +84,7 @@ Now i have the offset value, it has to be added to the starting memory address o
 
 Now that i have the memory address of the RCC_AHB1ENR, there's another important value, which is the reset value, in other words, the value stored by default inside the register when the STM32 F446RE-Nucleo is turned ON, in this case the value is 0x00000000. 
 
-Next i must find the correct bit position to enable the clock for the GPIO port A peripheral, as one might guess by looking at the reference manual, its the bit position 0. i must SET the value stored in bit position 0, from 0 to 1.
+Next i must find the correct bit position in order to enable the clock for the GPIO port A peripheral, as one might guess, by looking at the reference manual, its the bit position 0. Hence, i must SET the value stored in bit position 0, from 0 to 1.
 For that purpose i use a bitwise OR operation as will be shown later.
 
 The next step is to configure the PA5 pin to output mode, for that purpose i need to go to the reference manual and look for the starting address of the GPIOA peripheral:
@@ -105,7 +105,7 @@ In the same way as before, the address of the GPIOx_MODER is obtained by adding 
 
 to set the mode for PA5 as output its necesary to manipulate only the bit positions 10 and 11 (MODER5), using bitwise AND operation in order to clear both bit positions and after that, using bitwise OR to set the bit position 10 stored value to 1, by doing this the mode is set as 01: General purpose output mode.
 
-After i set the PA5 GPIO pin to output mode, there's still one last register to manipulate, and that id the **GPIO port output data register (GPIOx_ODR)**, its necessary to refer to the reference manual to find the relevant data:
+After i set the PA5 GPIO pin to output mode, there's still one last register to manipulate, and that is the **GPIO port output data register (GPIOx_ODR)**, its necessary to consult the reference manual in order to find the relevant data:
 
 ![verification](./images/GPIOA_ODR.png)
 
@@ -118,10 +118,10 @@ GPIOA_ODR address:
 
 Reset value: 0x00000000
 
-Now i have the address of the GPIOA_ODR register and the rest value. The next step is finding out what pin is necesary to set ON. For setting ON PA5 pin, i need to store the value 1 inside the bit position 5.
+Now i have the address of the GPIOA_ODR register and the rest value. The next step is finding out what pin is necessary to set ON. For setting ON PA5 pin, i need to store the value 1 inside the bit position 5.
 this is done with a bitwise OR operation.
 
-After all the above is done, the green user LED must be turn ON. 
+After all the above is done, the green user LED must be turned ON. 
 
 ## 4. Hardware Mapping & Register Reference
 
@@ -135,10 +135,10 @@ To implement this bare-metal driver, the following hardware resources, memory-ma
 | **Register** | `RCC_AHB1ENR` | `0x40023830` | Clock enable register (Offset: `0x30`) |
 | **Register** | `GPIOA_MODER` | `0x40020000` | GPIO Port A mode register (Offset: `0x00`) |
 | **Register** | `GPIOA_ODR` | `0x40020014` | GPIO Port A output data register (Offset: `0x14`) |
-| **Bitmask** | Clock Enable Mask | `0x00000001` | SET Bit 0 to `1` to enable the clock for GPIOA peripheral |
-| **Bitmask** | MODER Clear Mask | `0xFFFFF3FF` | Clears Bit positions 10 & 11 via bitwise AND to safely reset the field |
+| **Bitmask** | Clock Enable Mask | `0x00000001` | SET Bit possition 0 to `1` to enable the clock for GPIOA peripheral |
+| **Bitmask** | MODER Clear Mask | `0xFFFFF3FF` | Clears Bit positions 10 and 11 via bitwise AND to safely reset the field |
 | **Bitmask** | MODER Set Mask | `0x00000400` | Turns Bit positions 10 and 11 to `01` via bitwise OR for General Purpose Output mode |
-| **Bitmask** | ODR Set Mask | `0x00000020` | Force Bit 5 to `1` via bitwise OR to drive PA5 HIGH |
+| **Bitmask** | ODR Set Mask | `0x00000020` | SET Bit possition 5 to `1` via bitwise OR in order to drive PA5 HIGH |
 | **Hardware** | User LED | `LD2` (Green) | On-board LED connected to `PA5` |
 | **Solder Bridge**| Factory Routing | `SB42` (ON) / `SB29` (OFF) | Routes `PA5` to LED; isolates `PB13` |
 | **Physical Pin** | Arduino Connector | `D13` (CN5 - Pin 6) | Shared routing with User LED for Shield compatibility |
@@ -159,7 +159,7 @@ Then i created three pointer variables in order to hold the memory addresses of 
 
 ***ptr_PortAOutReg**: holds the memory address of the GPIOA port output data register (GPIOA_ODR). i manipulate the bit position 5 of this register in order to ON, so that it turns ON the LD2.
 
-the first thing i did was to enable the clock for the GPIO port A peripheral, for that purpose i used a bitwise OR operation using the bit mask 0x01 to set the bit position 0 ON (As shown on line 35).
+the first thing i did was to enable the clock for the GPIO port A peripheral, for that purpose i used a bitwise OR operation using the bit mask 0x01 to set the bit position 0 of the RCC_AHB1ENR ON (As shown on line 35).
 
 After that, i cleared the bit positions 10 and 11 of GPIOA_MODER using bitwise AND operation with the 0xFFFFF3FF mask. Then i used bitwise OR operation to set bit position 10, using the bit mask 0x00000400 in order to make the pattern of bit positions 10 and 11 as binary 01 (as shown in lines 38 and 41), which means general purpose output mode.
 
