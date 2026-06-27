@@ -144,9 +144,9 @@ To implement this bare-metal driver, the following hardware resources, memory-ma
 | **Register** | `GPIOA_MODER` | `0x40020000` | GPIO Port A mode register (Offset: `0x00`) |
 | **Register** | `GPIOA_ODR` | `0x40020014` | GPIO Port A output data register (Offset: `0x14`) |
 | **Bitmask** | Clock Enable Mask | `0x00000001` | SET Bit position 0 to `1` to enable the clock for GPIOA peripheral |
-| **Bitmask** | MODER Clear Mask | `0xFFFFF3FF` | Clears Bit positions 10 and 11 via bitwise AND to safely reset the field |
-| **Bitmask** | MODER Set Mask | `0x00000400` | Turns Bit positions 10 and 11 to `01` via bitwise OR for General Purpose Output mode |
-| **Bitmask** | ODR Set Mask | `0x00000020` | SET Bit position 5 to `1` via bitwise OR in order to drive PA5 HIGH |
+| **Bitmask** | GPIOA_MODER Clear Mask | `0xFFFFF3FF` | Clears Bit positions 10 and 11 via bitwise AND to safely reset the field |
+| **Bitmask** | GPIOA_MODER Set Mask | `0x00000400` | Turns Bit positions 10 and 11 to `01` via bitwise OR for General Purpose Output mode |
+| **Bitmask** | GPIOA_ODR Set Mask | `0x00000020` | SET Bit position 5 to `1` via bitwise OR in order to drive PA5 HIGH |
 | **Hardware** | User LED | `LD2` (Green) | On-board LED connected to `PA5` |
 | **Solder Bridge**| Factory Routing | `SB42` (ON) / `SB29` (OFF) | Routes `PA5` to LED; isolates `PB13` |
 | **Physical Pin** | Arduino Connector | `D13` (CN5 - Pin 6) | Shared routing with User LED for Shield compatibility |
@@ -201,5 +201,16 @@ Once line 46 is executed, the bit position 5 of GPIOA_ODR gets SET and starts ou
 
 ![verification](./images/LD2_encendido.jpg)
 
+## Update: Code Refactoring using Bitwise Shift Operations
 
+Once the fundamentals of manual hexadecimal masking were mastered, I updated the codebase and refactored it in order to implement bitwise shift operations that enhance code readability, maintainability, and save some time that otherwise would be spent finding manual hexadecimal bit masks.
 
+### Technical enhancements: 
+
+**Automating the process of creating bitmasks:** with bitwise shift operations I just need to consider the bit positions to be set or cleared and then adding the decimal number that matches the pattern of one's (1) as an operand of a bitwise left shift operation, while the other operand is the number of bit positions needed in that particular instruction. That is implemented through a bitwise OR operation in order to set certain bit positions or a bitwise AND operation if I need to clear them, in this case one must negate the bitwise shift operation in order to dynamically obtain the appropriate bit mask.
+
+**Improving readability and maintainability of the program:** Hexadecimal bit masks look like magic numbers, because in order to truly understand whats they're doing for us, it's necessary to translate the mask's value into binary and do the bitwise operation. Whereas bitwise shift operations are less casuistic, we just use the appropriate operands and right or left shift operation needed to set or clear certain bit positions.
+
+Here is the refactored source code of the Bare-Metal blinky program, with some commenting on the process of switching from hexadecimal bit masks to bitwise shift generated bit masks: 
+
+![verification](./images/refactored_blinky.png)   

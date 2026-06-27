@@ -32,18 +32,20 @@ int main(void)
 
 	/* Enable the clock for GPIO port A
 	 * set the 1st bit position of RCC AHB1 peripheral clock enable register (RCC_AHB1ENR)*/
-	*ptr_ClkCtrlReg |= 0x01;
+	*ptr_ClkCtrlReg |= (1 << 0);  // 0x01 == (1 << 0)
 
-	// Clear bit positions10 and 11 of GPIOA port mode Register without affecting the reset value
-	*ptr_PortAModeReg &= 0xFFFFF3FF;
+	/* Clear bit positions 10 and 11 of GPIOA port mode Register without affecting the reset value:
+	 * (3 << 10) == 110000000000
+	 * ~(3 << 10) == 001111111111 with this method we can clear the desired bit positions */
+	*ptr_PortAModeReg &= ~(3 << 10);
 
 	// Set bit positions 10 and 11 of GPIOA port mode Register to mode: 01 General Purpose output mode
-	*ptr_PortAModeReg |= 0x00000400;
+	*ptr_PortAModeReg |= (1 << 10);   // 010000000000 == (1 << 10)
 
 	/* Set bit position 5 of GPIOA port output data register, in this register the last 16 bit positions
 	 * are reserved, therefore we only use a mask for the first 16 bits (0-15) of the register, since
 	 * the pointer is dereferencing an unsigned 32 bit integer the last 16 bits are masked as zeroes*/
-	*ptr_PortAOutReg |= 0x0020;
+	*ptr_PortAOutReg |= (1 << 5); //0000000000100000 == (1 << 5) so the bitwise left shift operation is more convenient
 
     /* Loop forever */
 	while(TRUE);
