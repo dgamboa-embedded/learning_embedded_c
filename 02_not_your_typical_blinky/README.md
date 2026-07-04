@@ -59,11 +59,11 @@ If a certain solder bridge has a resistor (the black one with a 0 on the center)
 
 Other way to prove that there's a closed circuit between LD2 and PA5 is using the multimeter, passing 2 Volts through its probes to check if LD2 turns ON the green light. If it does, there's indeed a closed circuit between LD2 and PA5, and that's exactly what I proved with the following image.
 
-![schematic_LD2_connections](./images/turning_led_on_with_multimeter.png) 
+![closed_circuit_testing](./images/turning_led_on_with_multimeter.png) 
 
 According to the schematic, there's a 510 ohms resistance between LD2 and SB21, if there's a closed circuit between LD2 and PA5, one can measure the resistance, as follows.
 
-![schematic_LD2_connections](./images/measuring_resistance.png)  
+![closed_circuit_testing](./images/measuring_resistance.png)  
 
 I actually measured the resistance in kiloohms so the resistance we found was 0.511 kiloohms (511 ohms), which is almost exactly as stated by the schematic.
 
@@ -74,17 +74,17 @@ The conclusion is: **there's a closed circuit between LD2 and PA5.**
 
 Before manipulating the GPIO registers to work with PA5 pin, I look into the STM32 F446RE-NUCLEO board's datasheet for the board's block diagram:
 
-![connection_1](./images/F446RE-NUCLEO_block_diagram.png)
+![gpio_connections](./images/F446RE-NUCLEO_block_diagram.png)
 
-![connection_1](./images/F446RE-NUCLEO_block_diagram_2.png)
+![gpio_connections](./images/F446RE-NUCLEO_block_diagram_2.png)
 
 This block diagram reveals that the GPIO Port A peripheral is connected to the AHB1 system bus, so in order to manipulate the GPIOA registers, I need to enable the bus for the GPIO Port A peripheral using the **RCC AHB1 peripheral clock enable register (RCC_AHB1ENR)**. In order to do that, I must refer to the reference manual memory map, to find the starting address of the RCC peripheral:
 
-![connection_1](./images/RCC_starting_address.png)
+![reference_manual_rcc](./images/RCC_starting_address.png)
 
 After finding the starting memory address of the RCC peripheral, it's necessary to find the RCC AHB1 peripheral clock enable register (RCC_AHB1ENR) also in the reference manual:
 
-![connection_1](./images/RCC_AHB1ENR.png)
+![reference_manual_rcc](./images/RCC_AHB1ENR.png)
 
 Now I have the offset value, it has to be added to the starting memory address of the RCC peripheral in order to get the exact memory address of this register so:
 
@@ -97,11 +97,11 @@ For that purpose I use a bitwise OR operation as will be shown later.
 
 The next step is to configure the PA5 pin to output mode, for that purpose I need to go to the reference manual and look for the starting address of the GPIOA peripheral:
 
-![verification](./images/GPIOA_starting_address.png)
+![reference_manual_gpio](./images/GPIOA_starting_address.png)
 
 After that, I must find the correct register for changing the mode of the GPIOA PA5 pin to output mode, and it happens to be the **GPIO port mode register (GPIOx_MODER):**
 
-![verification](./images/GPIOx_MODER.png)
+![reference_manual_gpio_moder](./images/GPIOx_MODER.png)
 
 there's a lot of valuable data in the reference manual about the GPIOx_MODER:
 
@@ -115,7 +115,7 @@ to set the mode for PA5 as output its necesary to manipulate only the bit positi
 
 After I set the PA5 GPIO pin to output mode, there's still one last register to manipulate, and that is the **GPIO port output data register (GPIOx_ODR)**, its necessary to consult the reference manual in order to find the relevant data:
 
-![verification](./images/GPIOA_ODR.png)
+![reference_manual_gpio_ODR](./images/GPIOA_ODR.png)
 
 important information found in this section is:
 
@@ -156,7 +156,7 @@ To implement this bare-metal driver, the following hardware resources, memory-ma
 
 The following images contain the source code I wrote using the C programming language for embedded systems, using deterministic sized types from stdint.h, let's take a look:
 
-![verification](./images/program_description.png) ![verification](./images/blinky_src.png)
+![source_code](./images/program_description.png) ![source_code](./images/blinky_src.png)
 
 I included **stdint.h** in order to gain access to deterministic sized types. After that I created a symbolic constant named 'TRUE', the replacement text is 1. 
 Then I created three pointer variables in order to hold the memory addresses of the peripheral registers that I needed to manipulate:
@@ -199,7 +199,7 @@ After line 41 is executed bit position 10 gets SET, and the bit pattern of MODER
 
 Once line 46 is executed, the bit position 5 of GPIOA_ODR gets SET and starts outputing a HIGH voltage, and turning the LD2 ON, as show in the image below:
 
-![verification](./images/LD2_encendido.jpg)
+![ld2_ON](./images/LD2_ON.jpg)
 
 ## Update: Code Refactoring using Bitwise Shift Operations
 
@@ -213,4 +213,4 @@ Once the fundamentals of manual hexadecimal masking were mastered, I updated the
 
 Here is the refactored source code of the Bare-Metal blinky program, with some commenting on the process of switching from hexadecimal bit masks to bitwise shift generated bit masks: 
 
-![verification](./images/refactored_blinky.png)   
+![refactoring_src_code](./images/refactored_blinky.png)   
