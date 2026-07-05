@@ -131,7 +131,7 @@ this is done with a bitwise OR operation.
 
 After all the above is done, the green user LED must be turned ON. 
 
-## 4. Hardware Mapping & Register Reference
+## 4. Hardware Mapping & Register Reference:
 
 To implement this bare-metal driver, the following hardware resources, memory-mapped registers, and physical pins were analyzed and manipulated:
 
@@ -152,7 +152,7 @@ To implement this bare-metal driver, the following hardware resources, memory-ma
 | **Physical Pin** | Arduino Connector | `D13` (CN5 - Pin 6) | Shared routing with User LED for Shield compatibility |
 | **Physical Pin** | Morpho Connector | `CN10 - Pin 11` | Physical GPIO port A pin number 5 (PA5)|
 
-## 5. Developed Bare-Metal C program for manipulating bits inside peripheral registers and turning LD2 green user LED ON
+## 5. Developed Bare-Metal C program for manipulating bits inside peripheral registers and turning LD2 green user LED ON:
 
 The following images contain the source code I wrote using the C programming language for embedded systems, using deterministic sized types from stdint.h, let's take a look:
 
@@ -175,7 +175,7 @@ Finally, I set the bit position 5 of GPIOA_ODR by using bitwise OR operation wit
 
 In the final step, control goes to an infinite while loop in order to keep the LED ON). 
 
-## Showing the execution of the program step by step while keeping track of the peripheral registers stored values
+## Showing the execution of the program step by step while keeping track of the peripheral registers stored values:
 
 In this section, using the debug mode of STM32CubeIDE I'm going to show the step by step execution of the code while gazing at each bit position of the peripheral registers
 
@@ -185,7 +185,7 @@ The image above reveals the initial state or reset value of AHB1ENBR which is ze
 
 ![verification](./images/debug_mode_2.png)
 
-after line 35 is executed, the bit position 0 of the AHB1ENBR is set, which means that the clock is enabled to all peripherals connected to AHB1 bus.
+after line 35 is executed, the bit position 0 of the AHB1ENBR is set, which means that the clock is enabled for all peripherals connected to AHB1 bus.
 
 ![verification](./images/debug_mode_3.png)
 
