@@ -25,14 +25,14 @@ int main(void)
 {
     /* create a pointer to the RCC AHB1 peripheral clock enable register -->
      * offset 0x30 */
-	uint32_t * p_ClkCtrlReg        = (uint32_t *) 0x40023830;
+	uint32_t volatile * p_ClkCtrlReg        = (uint32_t *) 0x40023830;
     // create a pointer to the GPIOA port mode register --> offset 0x00
-	uint32_t * p_PortAModeReg      = (uint32_t *) 0x40020000;
+	uint32_t volatile * p_PortAModeReg      = (uint32_t *) 0x40020000;
 	// create a pointer to the GPIOA output data register --> offset 0x14
-	uint32_t * p_PortAOutReg       = (uint32_t *) 0x40020014;
+	uint32_t volatile * p_PortAOutReg       = (uint32_t *) 0x40020014;
 	/* Create a pointer to read-only data from the GPIOA input data register bit
 	 * position 0 (PA0) --> offset 0x10 */
-	uint32_t const * p_PortAInpReg = (uint32_t *) 0x40020010;
+	uint32_t const volatile * p_PortAInpReg = (uint32_t *) 0x40020010;
 
 	/* Enable the clock for GPIO port A
 	 * Set the 1st bit position of RCC AHB1 peripheral clock enable register

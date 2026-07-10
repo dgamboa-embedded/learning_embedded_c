@@ -176,3 +176,18 @@ The next action i took to solve the problem was, consulting chapter 7 of the STM
 
 The last thing i did was choosing a pin capable of performing I/O operations, preferably 5V toletant, with a near location to a 3V3 power suply pin and a GND pin, so GPIO port A pin number 0 (PA0) met all of these conditions.
 
+## Update: Code Refactoring using *volatile* type qualifier keyword:
+
+After gaining a deeper understanding about the function, the importance and some of the use cases of **volatile** keyword, I decided to refactor the source code of this program. 
+
+Before going into the source code, let's define the function of volatile keyword as: instructing the compiler not to optimize operations regarding a particular variable because its value might change due to external factors, e.g. the user routes the PA0 pin to 3V3 power supply pin or to GND, and that means that we need to read the value PA0 is receiving for every iteration of the infinite loop and not only once.
+
+One should use the volatile keyword when working with memory-mapped peripheral registers like RCC_AHB1ENR, GPIOA_ODR, GPIOA_IDR and GPIOA_MODER as the following refactoring image suggests:
+
+![refactored_source_code](./images/refactored_code.png)
+
+What is important to consider is that the pointer itself is not volatile, what is volatile is the data that it points to.  Another important detail to review can be found in line 35. In this case the type qualifier keywords **volatile** and **const** are used together within the same instruction. So, **volatile** in this case indicates that the data read by PA0 might change due to external factors as previously explained. Also the word const prevents the data value to be modified *by the programmer* but it's still subject to change when the pin reads a different input. It's worth using the **const** keyword for *read-only* variables.
+
+The reader might be wondering, why should I use volatile when the program compiles correctly with compiler optimization flag -O0?
+
+The answer to this question is that in production environments, embedded software is commonly compiled using high optimization levels (such as **`-O2`** or **`-O3`**) to achieve minimal code size and maximum execution speed. However, aggressive optimization introduces severe hazards when interacting with memory-mapped hardware and can also omit to generate operations for certain instructions involving peripheral registers which are crucial for a correct compilation and execution of the program, this is exactly the reason to qualify the data types of peripheral registers, ensuring the software remains deterministic and synchronized with the external physical state of the hardware.
