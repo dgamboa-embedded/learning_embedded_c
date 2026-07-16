@@ -13,6 +13,7 @@
  *   (Peripheral Base Address + Register Offset). */
 
 #include <stdint.h>
+#include "peripheral_registers.h"
 
 // Symbolic constant for the infinite loop
 #define TRUE 1
