@@ -1,4 +1,4 @@
-/* 03_reading_from_GPIO_pin: this program enables the clock for AHB1 connected
+                                                                                                                                                                                                                                /* 03_reading_from_GPIO_pin: this program enables the clock for AHB1 connected
  * peripherals such as GPIO port A peripheral. The program also manipulates
  * GPIOA port mode register (GPIOA_MODER) in order to clear bit positions 0
  * and 1 (PA0) and configure them as input mode, and also to set bit positions
@@ -18,26 +18,32 @@
  * format for curly braces. */
 
 #include <stdint.h>
+#include "peripheral_registers.h"
 
 #define TRUE 1
 
 int main(void)
 {
-    /* create a pointer to the RCC AHB1 peripheral clock enable register -->
-     * offset 0x30 */
-	uint32_t volatile * p_ClkCtrlReg        = (uint32_t *) 0x40023830;
-    // create a pointer to the GPIOA port mode register --> offset 0x00
-	uint32_t volatile * p_PortAModeReg      = (uint32_t *) 0x40020000;
-	// create a pointer to the GPIOA output data register --> offset 0x14
-	uint32_t volatile * p_PortAOutReg       = (uint32_t *) 0x40020014;
-	/* Create a pointer to read-only data from the GPIOA input data register bit
-	 * position 0 (PA0) --> offset 0x10 */
-	uint32_t const volatile * p_PortAInpReg = (uint32_t *) 0x40020010;
+	/* Pointer to the structure of type RCC_AHB1_ENR_t used to configure the
+	 * RCC AHB1 peripheral clock enable register */
+	RCC_AHB1_ENR_t volatile * const p_ClkCtrlReg  = (RCC_AHB1_ENR_t *)0x40023830;
+
+	/* Pointer to the structure of type GPIOx_MODER_t used to configure the
+	 * GPIOA port mode register */
+	GPIOx_MODER_t volatile * const p_PortAModeReg = (GPIOx_MODER_t *) 0x40020000;
+
+	/* Pointer to the structure of type GPIOx_ODR_t used to configure the
+	 * GPIOA output data register */
+	GPIOx_ODR_t volatile * const p_PortAOutReg    = (GPIOx_ODR_t *) 0x40020014;
+
+	/* Pointer to the structure of type GPIOx_IDR_t used to configure the
+	 * GPIOA input data register */
+	GPIOx_IDR_t const volatile * const p_PortAInpReg = (GPIOx_IDR_t *) 0x40020010;
 
 	/* Enable the clock for GPIO port A
 	 * Set the 1st bit position of RCC AHB1 peripheral clock enable register
 	 * (RCC_AHB1ENR)*/
-	*p_ClkCtrlReg |= (1 << 0);
+	p_ClkCtrlReg->gpioa_en = 1U;
 
 	/* Clear bit positions 10 and 11 of GPIOA port mode Register without
 	 * affecting the reset value:
@@ -45,33 +51,32 @@ int main(void)
 	 * no need to change the reset value for bit positions 0 and 1 (which
 	 * determine the mode of PA0), but as a good practice I still reset bit
 	 * positions 0 and 1 */
-	*p_PortAModeReg &= ~(3 << 10);
-	*p_PortAModeReg &= ~(3 << 0);
+
+	p_PortAModeReg->pin_0 = 0;
+	p_PortAModeReg->pin_5 = 0;
+
 
 	/* Set bit positions 10 and 11 of GPIOA port mode Register to mode: 01
 	 * General Purpose output mode. since the reset state of GPIOA port mode
 	 * Register is input mode, there is no need to change the value for bit
 	 * positions 0 and 1 (which determine the mode of PA0)*/
-	*p_PortAModeReg |= (1 << 10);
+	p_PortAModeReg->pin_5 = 1U;
 
 	/* Inside of an infinite loop, read the pin PA0, if is is LOW, turn OFF the
 	 * LD2, else, turn it ON */
 	while (TRUE)
 	{
-		/* Extract the value of bit position 0 (PA0) of GPIOA input data
-		 * register and save it inside pinStatus */
-		uint8_t pinStatus = (uint8_t) *p_PortAInpReg & (1 << 0);
-
 		//  if pinStatus is 0 (LOW): turn off the LED
-		if (!pinStatus)
+		if (!p_PortAInpReg->pin_0)
 		{
 			/* turn OFF LD2 by using bitwise AND, clearing the bit position 5 of
 			 * GPIOA port output data register */
-			*p_PortAOutReg &= ~(1 << 5);
+			p_PortAOutReg->pin_5 = 0;
+
 		}
 		else // if pinStatus is not 0 (if it is HIGH) we turn ON the LD2
 		{
-			*p_PortAOutReg |= (1 << 5);
+			p_PortAOutReg->pin_5 = 1U;
 		}
 	}
 

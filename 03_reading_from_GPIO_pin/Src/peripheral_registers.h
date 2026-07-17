@@ -1,7 +1,7 @@
 /*
  * peripheral_registers.h
  *
- *  Created on: Jul 15, 2026
+ *  Created on: Jul 16, 2026
  *      Author: d_gamboa
  */
 
@@ -60,6 +60,30 @@ typedef struct
 	uint32_t pin_14      : 2;
 	uint32_t pin_15      : 2;
 }GPIOx_MODER_t;
+
+/* create a structure to store, manipulate and read data from GPIO port x input
+ * data register using bit fields stored in 32-bit unsigned integers. Doing
+ * this is extremely important to save memory space. */
+typedef struct
+{
+	uint32_t pin_0       : 1;
+	uint32_t pin_1       : 1;
+	uint32_t pin_2       : 1;
+	uint32_t pin_3       : 1;
+	uint32_t pin_4       : 1;
+	uint32_t pin_5       : 1;
+	uint32_t pin_6       : 1;
+	uint32_t pin_7       : 1;
+	uint32_t pin_8       : 1;
+	uint32_t pin_9       : 1;
+	uint32_t pin_10      : 1;
+	uint32_t pin_11      : 1;
+	uint32_t pin_12      : 1;
+	uint32_t pin_13      : 1;
+	uint32_t pin_14      : 1;
+	uint32_t pin_15      : 1;
+	uint32_t reserved    : 16;
+}GPIOx_IDR_t;
 
 /* create a structure to store, manipulate and read data from GPIO port x output
  * data register using bit fields stored in 32-bit unsigned integers. Doing

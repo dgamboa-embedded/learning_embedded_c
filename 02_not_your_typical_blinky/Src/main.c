@@ -1,16 +1,20 @@
-/* 02_not_your_typical_blinky:  manipulates the RCC AHB1 peripheral clock
- * enable register (RCC_AHB1ENR) in order to enable the bus for GPIOA by
- * setting bit 0 of the register. Then, it clears bit positions 10 and 11 of GPIOA
- * port mode register using bitwise AND operation and then set the bit positions
- * corresponding to pin 5 (PA5) using the bitwise OR operation. Finally,
- * it sets bit position 5 of GPIOA port output register using bitwise OR, then
- * the program reaches an infinite for loop for keeping it running.
+/* 02_not_your_typical_blinky:  configures the RCC AHB1 peripheral clock
+ * enable register (RCC_AHB1ENR) in order to enable the bus for GPIOA peripheral
+ * by setting bit 0 of the register by dereferencing the gpioa_en bit field
+ * member of a pointer to a structure of type RCC_AHB1_ENR_t imported from
+ * peripheral_registers.h header file. Then, it clears bit positions 10 and 11
+ * of GPIOA port mode register and then set the bit positions corresponding to
+ * pin 5 (PA5) by dereferencing the pin_5 bit field member of a pointer to a
+ * structure of type GPIOx_MODER_t imported from peripheral_registers.h header
+ * file. Finally, it sets bit position 5 of GPIO port A output data register by
+ * dereferencing the pin_5 bit field member of a pointer to a
+ * structure of type GPIOx_ODR_t imported from peripheral_registers.h header
+ * file, then the program reaches an infinite while loop and keeps running.
  *
- * - All bit positions counting in this program is zero indexed, it reflects the reference manual organization.
- * - When a register is referred to as GPIOA... instead of
- *   GPIOx... it means that the program uses pointers to the absolute memory
- *   address of that specific register within the GPIOA boundaries
- *   (Peripheral Base Address + Register Offset). */
+ * - The memory addresses of the peripheral registers and offset values were
+ *   obtained from the reference manual, that's essential for assigning the
+ *   correct addresses to the pointers of the different types of the imported
+ *   structures. */
 
 #include <stdint.h>
 #include "peripheral_registers.h"
@@ -21,32 +25,32 @@
 
 int main(void)
 {
-	// pointer to the RCC AHB1 peripheral clock enable register --> offset 0x30
-	uint32_t *ptr_ClkCtrlReg = (uint32_t *) 0x40023830;
+	/* Pointer to the structure of type RCC_AHB1_ENR_t used to configure the
+	 * RCC AHB1 peripheral clock enable register */
+	RCC_AHB1_ENR_t volatile * const p_ClkCtrlReg  = (RCC_AHB1_ENR_t *)0x40023830;
 
-	// pointer to the GPIOA port mode register --> offset 0x00
-	uint32_t *ptr_PortAModeReg = (uint32_t *) 0x40020000;
+	/* Pointer to the structure of type GPIOx_MODER_t used to configure the
+	 * GPIOA port mode register */
+	GPIOx_MODER_t volatile * const p_PortAModeReg = (GPIOx_MODER_t *) 0x40020000;
 
-	// pointer to the GPIOA output data register --> offset 0x14
-	uint32_t *ptr_PortAOutReg = (uint32_t *) 0x40020014;
+	/* Pointer to the structure of type GPIOx_ODR_t used to configure the
+	 * GPIOA output data register */
+	GPIOx_ODR_t volatile * const p_PortAOutReg    = (GPIOx_ODR_t *) 0x40020014;
 
 
 	/* Enable the clock for GPIO port A
-	 * set the 1st bit position of RCC AHB1 peripheral clock enable register (RCC_AHB1ENR)*/
-	*ptr_ClkCtrlReg |= (1 << 0);  // 0x01 == (1 << 0)
+	 * set the 1st bit position of RCC AHB1 peripheral clock enable register */
+	p_ClkCtrlReg->gpioa_en = 1U;
 
-	/* Clear bit positions 10 and 11 of GPIOA port mode Register without affecting the reset value:
-	 * (3 << 10) == 110000000000
-	 * ~(3 << 10) == 001111111111 with this method we can clear the desired bit positions */
-	*ptr_PortAModeReg &= ~(3 << 10);
+	/* Clear bit positions 10 and 11 (pin 5) of GPIOA port mode Register */
+	p_PortAModeReg->pin_5  = 0;
 
-	// Set bit positions 10 and 11 of GPIOA port mode Register to mode: 01 General Purpose output mode
-	*ptr_PortAModeReg |= (1 << 10);   // 010000000000 == (1 << 10)
+	/* Set bit positions 10 and 11 (pin_5) of GPIO port A mode Register to:
+	 * 01 General Purpose output mode */
+	p_PortAModeReg->pin_5  = 1U;
 
-	/* Set bit position 5 of GPIOA port output data register, in this register the last 16 bit positions
-	 * are reserved, therefore we only use a mask for the first 16 bits (0-15) of the register, since
-	 * the pointer is dereferencing an unsigned 32 bit integer the last 16 bits are masked as zeroes*/
-	*ptr_PortAOutReg |= (1 << 5); //0000000000100000 == (1 << 5) so the bitwise left shift operation is more convenient
+	/* Set pin 5 of GPIO port A output data register in order to turn ON LD2*/
+	p_PortAOutReg->pin_5   = 1U;
 
     /* Loop forever */
 	while(TRUE);
