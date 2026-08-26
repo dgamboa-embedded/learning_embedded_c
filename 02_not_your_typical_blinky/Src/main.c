@@ -1,20 +1,38 @@
-/* 02_not_your_typical_blinky:  configures the RCC AHB1 peripheral clock
- * enable register (RCC_AHB1ENR) in order to enable the bus for GPIOA peripheral
- * by setting bit 0 of the register by dereferencing the gpioa_en bit field
- * member of a pointer to a structure of type RCC_AHB1_ENR_t imported from
- * peripheral_registers.h header file. Then, it clears bit positions 10 and 11
- * of GPIOA port mode register and then set the bit positions corresponding to
- * pin 5 (PA5) by dereferencing the pin_5 bit field member of a pointer to a
- * structure of type GPIOx_MODER_t imported from peripheral_registers.h header
- * file. Finally, it sets bit position 5 of GPIO port A output data register by
- * dereferencing the pin_5 bit field member of a pointer to a
- * structure of type GPIOx_ODR_t imported from peripheral_registers.h header
- * file, then the program reaches an infinite while loop and keeps running.
+/* 02_not_your_typical_blinky:
  *
- * - The memory addresses of the peripheral registers and offset values were
- *   obtained from the reference manual, that's essential for assigning the
- *   correct addresses to the pointers of the different types of the imported
- *   structures. */
+ * This program use a header file called: "peripheral_registers.h" where several
+ * structures were created in order to simplify working with specific bit fields
+ * of different peripheral registers of the STM32 NUCLEO-F446 development board.
+ * Since the peripheral registers are 32-bit sized, each structure makes use of
+ * bit field members of type uint32_t. Due to the fact that ARM Cortex-M4 uses
+ * little-endian byte ordering by default, Bit field members are ordered
+ * sequentially from the least significant bit (LSB) to the most significant
+ * bit (MSB).
+ *
+ * first of all, three pointers of the types defined by the imported structures,
+ * are created in order to effectively control peripheral registers using these
+ * pointers. It is necessary to assign the real memory addresses with their
+ * offset value included, this address must be casted to the appropriate data
+ * types in order to compile the program effectively.
+ *
+ * besides, the program configures the RCC AHB1 peripheral clock enable register
+ * (RCC_AHB1ENR) in order to enable the bus for GPIOA peripheral by setting
+ * bit 0 of the register by dereferencing the gpioa_en bit field member of a
+ * pointer to a structure of type RCC_AHB1_ENR_t imported from
+ * peripheral_registers.h header file. Then, bit positions 10 and 11 of GPIOA
+ * port mode register get cleared  by dereferencing the pin_5 bit field member
+ * of a pointer to a structure of type GPIOx_MODER_t making its value 0 and then
+ * configuring it as 1 or 01 since it's 2-bit sized, which means that PA5's mode
+ * is configured as output. Finally, it sets bit position 5 of GPIO port A
+ * output data register by dereferencing the pin_5 bit field member  of a
+ * pointer to a structure of type GPIOx_ODR_t imported from
+ * peripheral_registers.h header file, then the program reaches an infinite
+ * while loop and keeps running.
+ *
+ * - The memory addresses of the peripheral registers, their bit positions and
+ *   offset values were obtained from the reference manual, this is essential
+ *   for assigning the correct addresses to the pointers of the different types
+ *   of the imported structures. */
 
 #include <stdint.h>
 #include "peripheral_registers.h"
