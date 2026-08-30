@@ -201,7 +201,7 @@ Once line 46 is executed, the bit position 5 of GPIOA_ODR gets SET and starts ou
 
 ![ld2_ON](./images/LD2_ON.jpg)
 
-## Update: Code Refactoring using Bitwise Shift Operations
+## First Update: Code Refactoring using Bitwise Shift Operations
 
 Once the fundamentals of manual hexadecimal masking were mastered, I updated the codebase and refactored it in order to implement bitwise shift operations that enhance code readability, maintainability, and save some time that otherwise would be spent finding manual hexadecimal bit masks.
 
@@ -214,3 +214,29 @@ Once the fundamentals of manual hexadecimal masking were mastered, I updated the
 Here is the refactored source code of the Bare-Metal blinky program, with some commenting on the process of switching from hexadecimal bit masks to bitwise shift generated bit masks: 
 
 ![refactoring_src_code](./images/refactored_blinky.png)   
+
+## Second Update: Code Refactoring using structures (struct) and bit fields 
+
+Once realizing the purpose of structures and bit fields in embedded C programming, and learning that ARM Cortex M4 architecture uses little-endian byte ordering by default, Bit field members are ordered sequentially from the least significant bit (LSB) to the most significant bit (MSB). Therefore, I decided to refactor the source code from a single source file into a modular system containing a couple of files, separating the main function logic and a hardware abstraction header file for the structures that define the peripheral registers and map their bit positions into bitfield members from LSB to MSB. 
+
+This architectural update significantly enhances code readability, maintainability, and modularity. 
+
+
+### Technical enhancements: 
+**Abstracting the bitwise operations when working with peripheral registers:** Even though raw bitwise operations are precise and independent of each processor's endianess. when we know that a certain architecture is little-endian or big-endian, we can delegate the complexity of bitwise operations to the compiler by leveraging structures for each peripheral with bit field members representing the registers's bit positions. In this case each peripheral register is 32-bits long so I created bit field variables of uint32_t type. As follows:
+
+![peripheral_registers_structs](./images/peripheral_structs_1.png)![peripheral_registers_structs](./images/peripheral_structs_2.png)
+
+Each of these structures and their members is developed in order to correspond with the bit positions given in the reference manual for each peripheral register from LSB to MSB, by doing this we can delegate the complexity of bitwise operations to the compiler as I did in the main function, as follows:
+
+![refactored_main](./images/refactored_main_1.png)![refactored_main](./images/refactored_main_2.png)
+
+In main function I created pointers of each structure type, pointing to the exact memory location (the initial address of the peripheral register plus the offset value of the particular register.). Bitwise operations are abstracted (delegated to the compiler) because in order to access any specific bit position of a register, I only need to dereference the specific member of the structure and modify its value and the compiler generates the appropriate instructions to deal with the bitwise operations 
+
+**Exact Memory Placement & Qualification:** In the `main` function, pointers to each structure type are instantiated:
+
+ * **`const` qualifier:** Ensures the pointer itself cannot be reassigned, as peripheral register addresses in memory-mapped I/O are fixed.
+ 
+ * **`volatile` qualifier:** Informs the compiler that register contents may change outside the normal program flow due to external hardware events or interrupts. Consequently, the compiler guarantees explicit read and write memory accesses for every operation on this volatile data rather than optimizing them away.
+
+**Include Guards:** The header file utilizes `#ifndef` preprocessor directives to prevent recursive or multiple inclusions during compilation of the project.

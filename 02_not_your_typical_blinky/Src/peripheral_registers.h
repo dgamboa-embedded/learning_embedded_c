@@ -5,7 +5,7 @@
  *      Author: d_gamboa
  */
 
-/* I use conditional inclusion to make sure that the contents of this header
+/* Conditional inclusion is used to make sure that the contents of this header
  * file are included only once in the project. */
 #ifndef PERIPHERAL_REGISTERS_H_
 #define PERIPHERAL_REGISTERS_H_
