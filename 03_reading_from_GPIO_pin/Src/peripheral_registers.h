@@ -13,8 +13,9 @@
 #include <stdint.h>
 
 /* create a structure to store, manipulate and read data from RCC AHB1 clock
- * enable register, using bit fields stored in 32-bit unsigned integers. Doing
- * this is extremely important to save memory space. */
+ * enable register, using bit fields stored in 32-bit unsigned integer. Doing
+ * this is extremely important to save memory space and providing high-level
+ * of abstraction. */
 typedef struct
 {
 	uint32_t gpioa_en      : 1;
@@ -39,8 +40,7 @@ typedef struct
 }RCC_AHB1_ENR_t;
 
 /* create a structure to store, manipulate and read data from GPIO port x mode
- * register using bit fields stored in 32-bit unsigned integers. Doing
- * this is extremely important to save memory space. */
+ * register using bit fields stored in 32-bit unsigned integer. */
 typedef struct
 {
 	uint32_t pin_0       : 2;
@@ -62,8 +62,7 @@ typedef struct
 }GPIOx_MODER_t;
 
 /* create a structure to store, manipulate and read data from GPIO port x input
- * data register using bit fields stored in 32-bit unsigned integers. Doing
- * this is extremely important to save memory space. */
+ * data register using bit fields stored in 32-bit unsigned integer. */
 typedef struct
 {
 	uint32_t pin_0       : 1;
@@ -86,8 +85,7 @@ typedef struct
 }GPIOx_IDR_t;
 
 /* create a structure to store, manipulate and read data from GPIO port x output
- * data register using bit fields stored in 32-bit unsigned integers. Doing
- * this is extremely important to save memory space. */
+ * data register using bit fields stored in 32-bit unsigned integer.*/
 typedef struct
 {
 	uint32_t pin_0       : 1;
