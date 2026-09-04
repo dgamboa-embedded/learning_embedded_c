@@ -176,7 +176,7 @@ The next action i took to solve the problem was, consulting chapter 7 of the STM
 
 The last thing i did was choosing a pin capable of performing I/O operations, preferably 5V toletant, with a near location to a 3V3 power suply pin and a GND pin, so GPIO port A pin number 0 (PA0) met all of these conditions.
 
-## Update: Code Refactoring using *volatile* type qualifier keyword:
+## First Update: Code Refactoring using *volatile* type qualifier keyword:
 
 After gaining a deeper understanding about the function, the importance and some of the use cases of **volatile** keyword, I decided to refactor the source code of this program. 
 
@@ -191,3 +191,24 @@ What is important to consider is that the pointer itself is not volatile, what i
 The reader might be wondering, why should I use volatile when the program compiles correctly with compiler optimization flag -O0?
 
 The answer to this question is that in production environments, embedded software is commonly compiled using high optimization levels (such as **`-O2`** or **`-O3`**) to achieve minimal code size and maximum execution speed. However, aggressive optimization introduces severe hazards when interacting with memory-mapped hardware and can also omit to generate operations for certain instructions involving peripheral registers which are crucial for a correct compilation and execution of the program, this is exactly the reason to qualify the data types of peripheral registers, ensuring the software remains deterministic and synchronized with the external physical state of the hardware.
+
+## Second Update: Code Refactoring and GPIO Input Polling using structures and Bit Fields:
+
+Following the architectural pattern implemented in Project 02, this project was refactored to replace raw bitwise operations with strongly-typed (uint32_t) bit field structures defined in a custom header file called *`peripheral_registers.h`*.
+
+This project expands hardware abstraction using structures and bit field members in order to include **GPIO Input Reading** by sampling the logical voltage state (GND or 3V3) on pin PA0 (pin_0) via the GPIOA Input Data Register (of type *`GPIOx_IDR_t`*) and driving pin PA5 (User LED) accordingly in real time.
+
+### Technical & Architectural Enhancements
+
+* **Leveraging structures and bit fields to map GPIO Input Data Register:** Integrated typedef `GPIOx_IDR_t` structure into `peripheral_registers.h`. The 16 active input pins (`pin_0` to `pin_15`) are mapped as 1-bit fields alongside a 16-bit reserved space to match the 32-bit register layout, as follows:
+
+![hardware_abstraction_structure](./images/GPIOx_IDR_t.png)
+
+* **Real-Time Signal Evaluation:** Replaces manual bitwise masking (`&` and `|`) inside the main loop with clean bit field member access, in a similar way as I did in project 02, by dereferencing pointer to structure of type `GPIOx_IDR_t` and accesing pin_0 (PA0) to evaluate its physical state:
+
+![refactored_main](./images/refactored_main_1.png)![refactored_main](./images/refactored_main_2.png)![refactored_main](./images/refactored_main_3.png)
+
+There are a few things to highlight from the source code:
+
+* In line 55, I declared and defined a constant pointer that points to volatile and        constant data at the same time. the **const** qualifier prevents data from being modified *by the programmer* but it doesnt prevent data from being modified by hardware events or interrupts. Therefore, volatile keyword is used to ensure that the processor executes read/write operations when working with this pointer variable.
+* When working with peripheral registers it is extremely important to qualify data as volatile, to avoid the scenario where compiler performs optimizations to reduce the number of read/write instructions performed related to a certain register pointer variable. In line 83, because p_PortAInpReg points to volatile data, it doesn't matter the compiler optimization level that I'm using, pin_0 logical state is read on every iteration of the while loop, ensuring that the green user LED is ON or OFF depending on the logical state of pin_0 (PA0).
