@@ -2,7 +2,7 @@
 
 ### Quick note for the reader:
 
-This project builds directly upon the bare-metal foundations established in **Project 02: Not your typical blinky.** While the previous project focused exclusively on enabling the clock for peripheral registers connected to AHB1 bus, while setting the mode of GPIO port A pin 5 (*PA5*) as output mode, all of this for configuring PA5 to manipulate the onboard LED (*LD2*).
+This project builds directly upon the bare-metal foundations established in **Project 02: Not your typical blinky.** While the previous project focused exclusively on enabling the clock for peripheral registers connected to AHB1 bus, while setting the mode of GPIO port A pin 5 (*PA5*) as output mode, all of this for configuring PA5 to manipulate the onboard green user LED (*LD2*).
 
 This implementation introduces **reading** data from a GPIO pin (PA0), via GPIO Input Data Register (*GPIOx_IDR*), previously set in input mode through manipulation of bit positions 0 and 1 of GPIO port A Mode Register (*GPIOA_MODER*). 
 
@@ -37,7 +37,7 @@ From the previous table, we need to look after a pin with I/O capabilities and a
 
 by looking at the previous image, I know that PA0 has input and output capabilities while also having a great 5V tolerance.
 
-But, before moving forward, I need to look inside chapter 7 of the STM32 Nucleo-F446RE development board's user manual in order to know which pins are physically connected and therefore are not free. The following images show precisely these pins:
+Before moving forward, I need to look inside chapter 7 of the STM32 Nucleo-F446RE development board's user manual in order to know which pins are physically connected and therefore are not free. The following images show precisely these pins:
 
 ![user_manual_not_free_pin](./images/not_free_pin_1.png)
 
